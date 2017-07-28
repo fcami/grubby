@@ -578,6 +578,11 @@ update() {
     fi
 }
 
+# Sync /boot; only works if /boot is a separate filesystem (mountpoint)
+doSyncBootFS() {
+    mountpoint -q /boot && sync -f /boot && fsfreeze -f /boot && fsfreeze -u /boot && echo YOLO
+}
+
 doMkinitrd() {
     if [ -n "$dracut" ]; then
         tool="dracut $dracuthostonly -f $initrdfile $version"
@@ -591,6 +596,8 @@ doMkinitrd() {
 	echo "mkinitrd failed" >&2
 	exit 1
     fi
+    # flush the resulting initramfs (and vmlinuz as well) to disk
+    doSyncBootFS
 }
 
 rminitrd() {
